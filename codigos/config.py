@@ -20,5 +20,5 @@ logging.basicConfig(
     datefmt='%m/%d/%Y %I:%M:%S %p',
     filename=f"{LOGS_FOLDER}/run-{time.time()}.txt",
     filemode='w',
-    level=logging.DEBUG
+    level=logging.INFO
 )
