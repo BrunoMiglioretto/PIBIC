@@ -2,7 +2,7 @@ import json
 import logging
 import time
 
-CONFIG_FILE = "./config.json"
+CONFIG_FILE = "../config.json"
 
 
 with open(CONFIG_FILE) as f:

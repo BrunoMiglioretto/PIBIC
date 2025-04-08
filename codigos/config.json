@@ -1,8 +1,0 @@
-{
-  "datasets_folder": "C:/Users/bruno/puc/iniciacao/datasets/data",
-  "results_folder": "C:/Users/bruno/puc/iniciacao/results",
-  "logs_folder": "C:/Users/bruno/puc/iniciacao/logs",
-  "skip_datasets": [
-    "DuckDuckGeese"
-  ]
-}
