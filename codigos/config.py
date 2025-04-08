@@ -12,6 +12,7 @@ with open(CONFIG_FILE) as f:
 DATASETS_FOLDER = config.get("datasets_folder")
 RESULTS_FOLDER = config.get("results_folder")
 LOGS_FOLDER = config.get("logs_folder")
+SKIP_DATASETS = config.get("skip_datasets")
 
 
 logger = logging.getLogger(__name__)
