@@ -1,7 +1,7 @@
 from aeon.datasets import load_classification
 from aeon.datasets import load_from_ts_file
 
-from config import logger
+from utils.config import logger
 
 
 def load_dataset(dataset_name, dataset_folder):
