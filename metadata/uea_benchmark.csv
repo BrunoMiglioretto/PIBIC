@@ -1,4 +1,4 @@
-﻿Dataset,Un-normalised EDI,Un-normalised DTWI,Un-normalised DTWD,Normalised EDI,Normalised DTWI,Normalised DTWD
+﻿dataset,unnormalised_edi,unnormalised_dtwi,unnormalised_dtwd,normalised_edi,normalised_dtwi,normalised_dtwd
 ArticularyWordRecognition,0.97,0.98,0.987,0.97,0.98,0.987
 AtrialFibrillation,0.267,0.267,0.2,0.267,0.267,0.22
 BasicMotions,0.675,1,0.975,0.676,1,0.975

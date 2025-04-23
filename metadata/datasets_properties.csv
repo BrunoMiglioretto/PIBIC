@@ -1,4 +1,4 @@
-﻿Dataset,TrainCases,TestCases,Dimensions,Length,Classes
+﻿dataset,train_cases,test_cases,dimensions,length,classes
 ArticularyWordRecognition,275,300,9,144,25
 AtrialFibrillation,15,15,2,640,3
 BasicMotions,40,40,6,100,4
