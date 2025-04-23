@@ -3,4 +3,4 @@
 /datasets
 .ipynb_checkpoints
 .idea
-/logs
+/logs/*
