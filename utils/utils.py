@@ -62,65 +62,104 @@ def transform_series(series, representation):
     referência para entender um pouco melhor: https://pyts.readthedocs.io/en/stable/modules/image.html
     """
 
-    series = np.array(znorm(series))
-    if representation == "CWT":
-        coeffs, freqs = pywt.cwt(series, scales=np.arange(1, len(series) + 1), wavelet='morl') # morl
-        im_final = coeffs
-    elif representation == "MTF":
-        series = series.reshape(1, len(series))
-        mtf = MarkovTransitionField(strategy='normal') #n_bins=4, strategy='uniform'
-        X_mtf = mtf.fit_transform(series)
-        im_final = X_mtf[0]
-    elif representation == "GADF":
-        series = series.reshape(1, len(series))
-        gaf = GramianAngularField(method='difference')
-        X_gaf = gaf.fit_transform(series)
-        im_final = X_gaf[0]
-    elif representation == "GASF":
-        series = series.reshape(1, len(series))
-        gaf = GramianAngularField(method='summation')
-        X_gaf = gaf.fit_transform(series)
-        im_final = X_gaf[0]
-    elif representation == "RP":
-        series = series.reshape(1, len(series))
-        rp = RecurrencePlot(threshold='distance')
-        X_rp = rp.fit_transform(series)
-        im_final = X_rp[0]
-    elif representation == "FIRTS":
-        series = series.reshape(1, len(series))
-        mtf = MarkovTransitionField(n_bins=4, strategy='uniform')
-        X_mtf = mtf.fit_transform(series)
-        gaf = GramianAngularField(method='difference')
-        X_gaf = gaf.fit_transform(series)
-        rp = RecurrencePlot(threshold='distance')
-        X_rp = rp.fit_transform(series)
-        im_final = (X_mtf[0] + X_gaf[0] + X_rp[0])
-    return im_final
+    try:
+        series = np.array(znorm(series))
+        if representation == "CWT":
+            try:
+                coeffs, freqs = pywt.cwt(series, scales=np.arange(1, len(series) + 1), wavelet='morl') # morl
+                im_final = coeffs
+            except Exception as e:
+                logger.error(f"Problema ao transformar uma série em CWT: {e}")
+        elif representation == "MTF":
+            try:
+                series = series.reshape(1, len(series))
+                mtf = MarkovTransitionField(strategy='normal') #n_bins=4, strategy='uniform'
+                X_mtf = mtf.fit_transform(series)
+                im_final = X_mtf[0]
+            except Exception as e:
+                logger.error(f"Problema ao transformar uma série em MTF: {e}")
+        elif representation == "GADF":
+            try:
+                series = series.reshape(1, len(series))
+                gaf = GramianAngularField(method='difference')
+                X_gaf = gaf.fit_transform(series)
+                im_final = X_gaf[0]
+            except Exception as e:
+                logger.error(f"Problema ao transformar uma série em GADF: {e}")
+        elif representation == "GASF":
+            try:
+                series = series.reshape(1, len(series))
+                gaf = GramianAngularField(method='summation')
+                X_gaf = gaf.fit_transform(series)
+                im_final = X_gaf[0]
+            except Exception as e:
+                logger.error(f"Problema ao transformar uma série em GASF: {e}")
+        elif representation == "RP":
+            try:
+                series = series.reshape(1, len(series))
+                rp = RecurrencePlot(threshold='distance')
+                X_rp = rp.fit_transform(series)
+                im_final = X_rp[0]
+            except Exception as e:
+                logger.error(f"Problema ao transformar uma série em RP: {e}")
+        elif representation == "FIRTS":
+            try:
+                series = series.reshape(1, len(series))
+                mtf = MarkovTransitionField(n_bins=4, strategy='uniform')
+                X_mtf = mtf.fit_transform(series)
+                gaf = GramianAngularField(method='difference')
+                X_gaf = gaf.fit_transform(series)
+                rp = RecurrencePlot(threshold='distance')
+                X_rp = rp.fit_transform(series)
+                im_final = (X_mtf[0] + X_gaf[0] + X_rp[0])
+            except Exception as e:
+                logger.error(f"Problema ao transformar uma série em FIRTS: {e}")
+        return im_final
+    except Exception as e:
+        logger.error(f"Problema ao transformar uma série com o znorm: {e}")
 
 
-# def dimensions_fusion(img_dataset, operation):
-#     """
-#     operation: sum, subtraction, dot_product, element_wise
-#     """
-#
-#     new_data = []
-#     for dataset in img_dataset:
-#         imgs = dataset.copy()
-#         img_final = imgs.pop()
-#         for img in imgs:
-#             if operation == 'sum':
-#                 img_final += img
-#             elif operation == 'subtraction':
-#                 img_final -= img
-#             elif operation == 'dot_product':
-#                 img_final = np.dot(img_final, img)
-#             elif operation == 'element_wise':
-#                 img_final = np.multiply(img_final, img)
-#
-#         flatten_img = img_final.flatten()
-#         new_data.append(flatten_img)
-#
-#     return np.array(new_data)
+def dimensions_fusion(img_dataset, operation):
+    """
+    operation: sum, subtraction, dot_product, element_wise
+    """
+    try:
+        new_data = []
+        for dataset in img_dataset:
+            imgs = dataset.copy()
+            img_final = imgs.pop()
+            for img in imgs:
+                if operation == 'sum':
+                    try:
+                        img_final += img
+                    except Exception as e:
+                        logger.error(f"Problema ao fundir usando sum: {e}")
+                elif operation == 'subtraction':
+                    try:
+                        img_final -= img
+                    except Exception as e:
+                        logger.error(f"Problema ao fundir usando subtraction: {e}")
+                elif operation == 'dot_product':
+                    try:
+                        img_final = np.dot(img_final, img)
+                    except Exception as e:
+                        logger.error(f"Problema ao fundir usando dot_product: {e}")
+                elif operation == 'element_wise':
+                    try:
+                        img_final = np.multiply(img_final, img)
+                    except Exception as e:
+                        logger.error(f"Problema ao fundir usando element_wise: {e}")
+
+            try:
+                flatten_img = img_final.flatten()
+                new_data.append(flatten_img)
+
+                new_series = np.array(new_data)
+            except Exception as e:
+                logger.error(f"Problema ao transformar as imagens em um numpy array: {e}")
+            return new_series
+    except Exception as e:
+        logger.error(f"Problema geral ao fundir as séries: {e}")
 
 
 def PAA(s, w):
@@ -134,48 +173,3 @@ def PAA(s, w):
         res[i] = np.mean(s[start_idx:end_idx])
 
     return res
-
-
-def dimensions_fusion(img_dataset, operation):
-    """
-    operation: sum, subtraction, dot_product, element_wise
-    """
-    import numpy as np
-
-    new_data = []
-    for dataset in img_dataset:
-        imgs = dataset.copy()
-
-        # identificamos a maior dimensão dentro do dataset
-        max_shape = np.max(np.array([img.shape for img in imgs]), axis=0)
-
-        padded_imgs = []
-        for img in imgs:
-            # calculamos o padding necessário de acordo com a maior dimensão
-            pad_width = [(0, max_d - s) for max_d, s in zip(max_shape, img.shape)]
-            # aplicamos o padding adicionando zeros
-            padded_img = np.pad(img, pad_width, mode='constant', constant_values=0)
-            padded_imgs.append(padded_img)
-
-        img_final = padded_imgs[0]
-        for img in padded_imgs[1:]:
-            if operation == 'sum':
-                img_final += img
-            elif operation == 'subtraction':
-                img_final -= img
-            elif operation == 'dot_product':
-                # se todas as matrizes forem da mesma dimensão (ex. 5x5), podemos multiplicar diretamente
-                if img_final.shape[-1] == img.shape[0]:
-                    img_final = np.dot(img_final, img)
-                else:
-                    # tentativa de fallback (ns se vai funcionar, estou um pouco perdido nas propriedades do dot product)
-                    # basicamente, a ideia é que quando as dimensões não forem compatíveis para o dot product, podemos tentar pegar a matriz transposta
-                    # por ex, se img_final é 3x4 e a img é 2x4, podemos tentar fazer o dot product com a transposta da img, o que vai resultar na operação 3x4 @ 4x2 = 3x2
-                    img_final = np.dot(img_final, img.T)
-            elif operation == 'element_wise':
-                img_final = np.multiply(img_final, img)
-
-        flatten_img = img_final.flatten()
-        new_data.append(flatten_img)
-
-    return np.array(new_data)

@@ -2,7 +2,12 @@ import json
 import logging
 import time
 
-CONFIG_FILE = r"C:\Users\bruno\puc\iniciacao\projeto\config.json"
+CONFIG_FILE = "/Users/brunomiglioretto/puc/iniciacao/pibic/config.json"
+
+RESULTS_FILENAME = f'results_final.csv'
+
+representations = ['RP', 'MTF', 'GASF', 'GADF', 'FIRTS', 'CWT']
+operations = ["sum", "subtraction", "dot_product", "element_wise"]
 
 
 with open(CONFIG_FILE) as f:
