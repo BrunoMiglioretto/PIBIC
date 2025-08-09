@@ -6,8 +6,8 @@ from aeon.datasets.tsc_datasets import multivariate
 from sklearn.linear_model import RidgeClassifierCV
 
 from utils import config
-from utils.config import DATASETS_FOLDER, logger
-from utils.utils import transform_series, dimensions_fusion, load_dataset, PAA
+from utils.config import logger
+from utils.utils import transform_series, dimensions_fusion, load_dataset, PAA, znorm
 #%% md
 # #### Configurações
 #%%
@@ -15,7 +15,6 @@ RESULTS_FILENAME = f'results_final.csv'
 
 reps = ['RP', 'MTF', 'GASF', 'GADF', 'FIRTS', 'CWT']
 operations = ["sum", "subtraction", "dot_product", "element_wise"]
-
 #%%
 try:
     df_results = pd.read_csv(f"{config.RESULTS_FOLDER}/{RESULTS_FILENAME}")
@@ -31,9 +30,9 @@ except FileNotFoundError:
 #%% md
 # #### Gerando resultados com apenas o classficador Ridge sem nenhuma transformação ou convolução
 #%%
-from utils.utils import znorm
+processes_datasets = multivariate
 
-for dataset_name in multivariate:
+for dataset_name in processes_datasets:
     if df_results[
         (df_results["dataset"] == dataset_name)
         & (df_results["representation"].isnull())
@@ -43,7 +42,7 @@ for dataset_name in multivariate:
         continue
 
     try:
-        dataset = load_dataset(dataset_name, DATASETS_FOLDER)
+        dataset = load_dataset(dataset_name, config.DATASETS_FOLDER)
         X_train = dataset["X_train"]
         y_train = dataset["y_train"]
         X_test = dataset["X_test"]
@@ -52,12 +51,6 @@ for dataset_name in multivariate:
         try:
             X_train_transformed = np.array([np.sum([znorm(series) for series in exemple], axis=0) for exemple in X_train])
             X_test_transformed = np.array([np.sum([znorm(series) for series in exemple], axis=0) for exemple in X_test])
-           
-            algorithm = MiniRocket(n_kernels=10000, n_jobs=-1, random_state=6)
-            algorithm.fit(X_train_transformed)
-            
-            X_train_transformed = algorithm.transform(X_train_transformed)
-            X_test_transformed = algorithm.transform(X_test_transformed)
             
             classifier = RidgeClassifierCV(alphas=np.logspace(-3, 3, 10))
             classifier.fit(X_train_transformed, y_train)
@@ -69,24 +62,46 @@ for dataset_name in multivariate:
                 "representation": None,
                 "operation": None,
                 "accuracy": accuracy,
+                "convolution_algorithm": None,
+                "classification_algorithm": "Ridge",
+            }
+            df_results.loc[len(df_results)] = new_result_line
+            df_results.to_csv(f"{config.RESULTS_FOLDER}/{RESULTS_FILENAME}", index=False)
+            
+            # Treinamento com MiniRocket
+            algorithm = MiniRocket(n_kernels=10000, n_jobs=-1, random_state=6)
+            algorithm.fit(X_train_transformed)
+            
+            X_train_convoluted = algorithm.transform(X_train_transformed)
+            X_test_convoluted = algorithm.transform(X_test_transformed)
+            
+            classifier = RidgeClassifierCV(alphas=np.logspace(-3, 3, 10))
+            classifier.fit(X_train_convoluted, y_train)
+            
+            accuracy = classifier.score(X_test_convoluted, y_test)
+
+            new_result_line = {
+                "dataset": dataset_name,
+                "representation": None,
+                "operation": None,
+                "accuracy": accuracy,
                 "convolution_algorithm": "MiniRocket",
                 "classification_algorithm": "Ridge",
             }
             df_results.loc[len(df_results)] = new_result_line
             df_results.to_csv(f"{config.RESULTS_FOLDER}/{RESULTS_FILENAME}", index=False)
-
-            logger.info("Processamento finalizado com sucesso.")
             
+            # Treinamento com Rocket
             algorithm = Rocket(n_kernels=10000, n_jobs=-1, random_state=6)
             algorithm.fit(X_train_transformed)
             
-            X_train_transformed = algorithm.transform(X_train_transformed)
-            X_test_transformed = algorithm.transform(X_test_transformed)
+            X_train_convoluted = algorithm.transform(X_train_transformed)
+            X_test_convoluted = algorithm.transform(X_test_transformed)
             
             classifier = RidgeClassifierCV(alphas=np.logspace(-3, 3, 10))
-            classifier.fit(X_train_transformed, y_train)
+            classifier.fit(X_train_convoluted, y_train)
             
-            accuracy = classifier.score(X_test_transformed, y_test)
+            accuracy = classifier.score(X_test_convoluted, y_test)
 
             new_result_line = {
                 "dataset": dataset_name,
@@ -106,17 +121,11 @@ for dataset_name in multivariate:
         logger.error(f"Problema ao carregar dataset {dataset_name}: {e}")
 
 #%% md
-# - Aplicar Up sampling
-# - Down sampling
-# - Aplicar o PCA
-# - Boxplot com apenas uma categoria
-# - Pegar a média dos visinhos quando for nan
-# 
-# - Mostrar gráficos com
-#%% md
 # #### Gerando resultados com o classficador Ridge, transformações e convoluções
 #%%
-for dataset_name in []:
+processes_datasets = multivariate
+
+for dataset_name in processes_datasets:
     try:
         if df_results[
             (df_results["dataset"] == dataset_name)
